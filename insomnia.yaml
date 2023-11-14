@@ -1,0 +1,179 @@
+_type: export
+__export_format: 4
+__export_date: 2023-11-14T23:26:23.635Z
+__export_source: insomnia.desktop.app:v8.4.1
+resources:
+  - _id: req_69a748967aef42fcad1fb62a9e532ab6
+    parentId: wrk_6fe89095656b4af88030f8eef610f346
+    modified: 1698952117779
+    created: 1698952110871
+    url: localhost:3001/read-file/test
+    name: New Request
+    description: ""
+    method: GET
+    body: {}
+    parameters: []
+    headers:
+      - name: User-Agent
+        value: insomnia/8.3.0
+    authentication: {}
+    metaSortKey: -1698952110871
+    isPrivate: false
+    settingStoreCookies: true
+    settingSendCookies: true
+    settingDisableRenderRequestBody: false
+    settingEncodeUrl: true
+    settingRebuildPath: true
+    settingFollowRedirects: global
+    _type: request
+  - _id: wrk_6fe89095656b4af88030f8eef610f346
+    parentId: null
+    modified: 1698357505806
+    created: 1698357505806
+    name: Temporal Test
+    description: ""
+    scope: collection
+    _type: workspace
+  - _id: req_97e0e924011e45bd8d9e75371a55799c
+    parentId: wrk_6fe89095656b4af88030f8eef610f346
+    modified: 1700003176553
+    created: 1698951879488
+    url: localhost:3001/create-file/bb
+    name: Create File
+    description: ""
+    method: POST
+    body: {}
+    parameters: []
+    headers:
+      - name: User-Agent
+        value: insomnia/8.3.0
+    authentication: {}
+    metaSortKey: -1698951879488
+    isPrivate: false
+    settingStoreCookies: true
+    settingSendCookies: true
+    settingDisableRenderRequestBody: false
+    settingEncodeUrl: true
+    settingRebuildPath: true
+    settingFollowRedirects: global
+    _type: request
+  - _id: req_473dc5b4aad04f539d66aa9baa1bfbb9
+    parentId: wrk_6fe89095656b4af88030f8eef610f346
+    modified: 1700001579255
+    created: 1698485746786
+    url: http://localhost:3000/workflow/start/
+    name: New Workflow
+    description: ""
+    method: POST
+    body: {}
+    parameters: []
+    headers:
+      - name: User-Agent
+        value: insomnia/8.3.0
+    authentication: {}
+    metaSortKey: -1698485746786
+    isPrivate: false
+    settingStoreCookies: true
+    settingSendCookies: true
+    settingDisableRenderRequestBody: false
+    settingEncodeUrl: true
+    settingRebuildPath: true
+    settingFollowRedirects: global
+    _type: request
+  - _id: ws-req_ec37df437230446893de51b95780938f
+    parentId: wrk_6fe89095656b4af88030f8eef610f346
+    modified: 1700003683891
+    created: 1698358048876
+    name: New WebSocket Request
+    url: ws:localhost:3000
+    metaSortKey: -1698358048876
+    headers:
+      - name: User-Agent
+        value: insomnia/8.3.0
+    authentication: {}
+    parameters: []
+    settingEncodeUrl: true
+    settingStoreCookies: true
+    settingSendCookies: true
+    settingFollowRedirects: global
+    description: ""
+    _type: websocket_request
+  - _id: req_7f814f9e56a6426086927c10d7c97586
+    parentId: wrk_6fe89095656b4af88030f8eef610f346
+    modified: 1700003846861
+    created: 1698357564778
+    url: http://localhost:3000/signal/einreichung-t8ka1a/
+    name: Signal to Workflow
+    description: ""
+    method: POST
+    body:
+      mimeType: application/json
+      text: |-2
+          {
+            "accept": "haha🤡"
+          }
+    parameters: []
+    headers:
+      - name: Content-Type
+        value: application/json
+      - name: User-Agent
+        value: insomnia/8.3.0
+    authentication: {}
+    metaSortKey: -1698357564778
+    isPrivate: false
+    settingStoreCookies: true
+    settingSendCookies: true
+    settingDisableRenderRequestBody: false
+    settingEncodeUrl: true
+    settingRebuildPath: true
+    settingFollowRedirects: global
+    _type: request
+  - _id: req_d5e8390c315a441cb48b9f1b85956b14
+    parentId: wrk_6fe89095656b4af88030f8eef610f346
+    modified: 1698951659468
+    created: 1698357514802
+    url: http://localhost:3000/signal/state-id-0/
+    name: Query Workflow
+    description: ""
+    method: GET
+    body: {}
+    parameters: []
+    headers:
+      - name: User-Agent
+        value: insomnia/8.3.0
+    authentication: {}
+    metaSortKey: -1698357514802
+    isPrivate: false
+    settingStoreCookies: true
+    settingSendCookies: true
+    settingDisableRenderRequestBody: false
+    settingEncodeUrl: true
+    settingRebuildPath: true
+    settingFollowRedirects: global
+    _type: request
+  - _id: env_ddacacb2bfefe400b2f2c44fcd04a50358b9d23a
+    parentId: wrk_6fe89095656b4af88030f8eef610f346
+    modified: 1698357505808
+    created: 1698357505808
+    name: Base Environment
+    data: {}
+    dataPropertyOrder: null
+    color: null
+    isPrivate: false
+    metaSortKey: 1698357505808
+    _type: environment
+  - _id: jar_ddacacb2bfefe400b2f2c44fcd04a50358b9d23a
+    parentId: wrk_6fe89095656b4af88030f8eef610f346
+    modified: 1698357505809
+    created: 1698357505809
+    name: Default Jar
+    cookies: []
+    _type: cookie_jar
+  - _id: ws-payload_470d0c7733c141e8bd669dfac1c8625a
+    parentId: ws-req_ec37df437230446893de51b95780938f
+    modified: 1698358627832
+    created: 1698358572342
+    name: New Payload
+    value: ""
+    mode: application/json
+    _type: websocket_payload
