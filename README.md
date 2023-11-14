@@ -14,10 +14,14 @@ The Client scripts are:
 ### Running this sample
 
 1. `temporal server start-dev` to start [Temporal Server](https://github.com/temporalio/cli/#installation).
-1. `npm install` to install dependencies.
-1. `npm run start.watch` to start the Worker.
-1. In another shell, `npm run workflow.start` to run the Workflow.
-1. Run `npm run workflow.query` to query the Workflow. Should print `{ meaning: undefined }`
-1. Run `npm run workflow.signal` to unblock the Workflow. Should print `setValueSignal sent`
-1. Run `npm run workflow.query` to query the Workflow. Should print `{ meaning: 42 }`
-1. Run `npm run workflow.cancel` to cancel the Workflow. Should print `workflow canceled`
+1. `pnpm install` to install dependencies.
+1. `pnpm run start.watch` to start the Worker.
+1. In another shell, `pnpm run workflow.start` to run the Workflow.
+
+Or run these to develop:
+```
+temporal server start-dev --db-filename temporal-db --log-format pretty
+pnpm server.watch
+pnpm external.watch
+pnpm worker.watch
+```

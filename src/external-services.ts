@@ -15,12 +15,17 @@ httpServer.listen(PORT, () => {
 
 /** Unreliably create a file with silly content */
 app.post('/create-file/:file_name', async (req: Request, res: Response) => {
-  const failTooLate = Math.random() > 0.5;
+  const failTooLate = Math.random() > 0.1;
   const fileName = req.params.file_name;
   const suffix = `-${Math.random().toString(36).substring(7, 14)}`
   const fileContent = `lol ${Math.random().toString(36).substring(7, 14)}`;
+
   fs.writeFile(`${BASE_DIRECTORY}${fileName}${suffix}`, fileContent, (err) => {
-    if (err || failTooLate) throw err;
+
+    if (err || failTooLate) {
+      console.log(err || failTooLate);
+      return res.status(500).send(`Error while writing file ${fileName}`);
+    }
     res.send(`File saved ${fileName}`);
   });
 });
@@ -29,6 +34,7 @@ app.post('/create-file/:file_name', async (req: Request, res: Response) => {
 app.get('/read-file/:file_name', async (req: Request, res: Response) => {
   const fileName = req.params.file_name;
   const fail = Math.random() > 0.5;
+
   fs.readFile(`${BASE_DIRECTORY}${fileName}`, 'utf8', (err, data) => {
     if (err || fail) {
       console.log(err);

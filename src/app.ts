@@ -2,7 +2,7 @@ import { Client } from '@temporalio/client';
 import express, { Request, Response } from 'express';
 import http from 'http';
 import { Server as WebSocketServer } from 'ws';
-import { getValueQuery, setValueSignal } from './workflows';
+import { getValueQuery, setValueSignal, acceptSignal, rejectSignal } from './workflows';
 import { aktenFluss } from './workflows';
 
 const PORT = 3000;
@@ -28,8 +28,15 @@ app.post('/signal/:workflowId', async (req: Request, res: Response) => {
   const handle = temporal.workflow.getHandle(req.params.workflowId);
 
   for (const [key, value] of Object.entries(req.body)) {
-    await handle.signal(setValueSignal, key, value);
-    [Symbol]
+    if (key === 'accept') {
+      await handle.signal(acceptSignal);
+    }
+    else if (key === 'reject') {
+      await handle.signal(rejectSignal);
+    }
+    else {
+      await handle.signal(setValueSignal, key, value);
+    }
   }
 
   // Now, also query the workflow after signaling
@@ -54,7 +61,7 @@ async function triggerWorkflow(req: Request, res: Response) {
   }
 
   await temporal.workflow.start(aktenFluss, {
-    taskQueue: 'state',
+    taskQueue: 'akten',
     workflowId: req.params.workflowId,
     args: [req.body],
   });
