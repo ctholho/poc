@@ -11,7 +11,6 @@ const temporal = new Client(); // default temporal dev client
 const app = express();
 app.use(express.json());
 const httpServer = http.createServer(app);
-const wss = new WebSocketServer({ server: httpServer });
 httpServer.listen(PORT, () => {
   console.log(`Server is running on http://localhost:${PORT}`);
 });
@@ -39,16 +38,6 @@ app.post('/signal/:workflowId', async (req: Request, res: Response) => {
     }
   }
 
-  // Now, also query the workflow after signaling
-  // const meaning = await handle.query(getValueQuery, 'meaning-of-life');
-
-  // Broadcast the queried result to all connected WebSocket clients
-  wss.clients.forEach((client) => {
-    if (client.readyState === client.OPEN) {
-      client.send('Updated.');
-    }
-  });
-
   res.send(`Sent data: ${JSON.stringify(req.body)}`);
 });
 
@@ -56,9 +45,6 @@ app.post('/signal/:workflowId', async (req: Request, res: Response) => {
 app.post('/workflow/start/', triggerWorkflow);
 app.post('/workflow/start/:workflowId', triggerWorkflow);
 async function triggerWorkflow(req: Request, res: Response) {
-  if (req.params.workflowId === undefined) {
-    req.params.workflowId = `einreichung-${Math.random().toString(36).substring(7, 14)}`;
-  }
 
   await temporal.workflow.start(aktenFluss, {
     taskQueue: 'akten',
@@ -74,3 +60,4 @@ app.post('/workflow/stop/:workflowId', async (req: Request, res: Response) => {
   await temporal.workflow.getHandle(req.params.workflowId).cancel();
   res.send(`Workflow ${req.params.workflowId} stopped.`);
 });
+

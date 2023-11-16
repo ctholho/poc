@@ -9,7 +9,7 @@
     "worker.start": "ts-node src/worker.ts",
     "worker.watch": "nodemon src/worker.ts",
     "server.watch": "nodemon src/app.ts",
-    "external.watch": "nodemon src/external-services.ts"
+    "unreliable.watch": "nodemon src/unreliable-service.ts"
   },
   "nodemonConfig": {
     "execMap": {

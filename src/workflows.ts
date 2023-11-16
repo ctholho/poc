@@ -1,4 +1,4 @@
-import { CancellationScope, defineSignal, setHandler, defineQuery, proxyActivities, sleep } from '@temporalio/workflow';
+import { ApplicationFailure, CancellationScope, defineSignal, setHandler, defineQuery, proxyActivities, sleep } from '@temporalio/workflow';
 import { Duration } from '@temporalio/common';
 import type { createActivities } from './activities';
 
@@ -37,14 +37,14 @@ export async function aktenFluss(input: IInput): Promise<void> {
   setHandler(setValueSignal, (key, value) => void state.set(key, value));
   setHandler(getValueQuery, (key) => state.get(key));
 
-  // await read('something');
+  console.log('testm ey round');
 
-  const status = await timeOutOrUserAction('5 minutes');
+  const status = await timeOutOrUserAction('200s');
   if (status === 'good') {
     await write('new-test');
   }
   else if (status === 'no time') {
-    await write('you suck')
+    throw new ApplicationFailure('Task timed out.', 'test', false, ['one detail', 'two details'])
   }
 
   // await CancellationScope.current().cancelRequested;
