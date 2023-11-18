@@ -11,17 +11,6 @@ const { read, write } = proxyActivities<ReturnType<typeof createActivities>>({
   startToCloseTimeout: '6 minutes',
 });
 
-export interface IInput {
-  akte?: IAkte;
-  akten?: IAkte[];
-  metadata?: any;
-}
-
-export interface IAkte {
-  name: string;
-  datum: string;
-}
-
 export function timeOutOrUserAction(timeout: Duration) {
   return new Promise((res) => {
     setHandler(acceptSignal, () => res('good'))
@@ -30,7 +19,7 @@ export function timeOutOrUserAction(timeout: Duration) {
   })
 }
 
-export async function aktenFluss(input: IInput): Promise<void> {
+export async function aktenFluss(input: string): Promise<void> {
   const state = new Map<string, any>();
   state.set('input', input);
 

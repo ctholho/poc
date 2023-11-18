@@ -6,7 +6,7 @@ const SERVER = 'http://localhost:3001';
 async function run() {
   const worker = await Worker.create({
     workflowsPath: require.resolve('./workflows'),
-    taskQueue: 'akten',
+    taskQueue: '🤡-important-stuff',
     activities: createActivities(SERVER),
   });
   await worker.run();

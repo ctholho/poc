@@ -47,7 +47,7 @@ app.post('/workflow/start/:workflowId', triggerWorkflow);
 async function triggerWorkflow(req: Request, res: Response) {
 
   await temporal.workflow.start(aktenFluss, {
-    taskQueue: 'akten',
+    taskQueue: '🤡-important-stuff',
     workflowId: req.params.workflowId,
     args: [req.body],
   });
