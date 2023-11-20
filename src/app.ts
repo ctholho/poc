@@ -1,9 +1,8 @@
 import { Client } from '@temporalio/client';
+import { WorkflowExecutionAlreadyStartedError, WorkflowNotFoundError } from '@temporalio/workflow';
 import express, { Request, Response } from 'express';
 import http from 'http';
-import { Server as WebSocketServer } from 'ws';
-import { getValueQuery, setValueSignal, acceptSignal, rejectSignal } from './workflows';
-import { aktenFluss } from './workflows';
+import { urlaubsAntrag, acceptSignal } from './workflows';
 
 const PORT = 3000;
 
@@ -15,49 +14,81 @@ httpServer.listen(PORT, () => {
   console.log(`Server is running on http://localhost:${PORT}`);
 });
 
-/** Query a signal of a running workflow */
-app.get('/signal/:workflowId/:key', async (req: Request, res: Response) => {
-  const handle = temporal.workflow.getHandle(req.params.workflowId);
-  const result = await handle.query(getValueQuery, req.params.key);
-  res.send(`Result is: ${JSON.stringify(result)}`);
+// /** Query a signal of a running workflow */
+// app.search('/state', async (req: Request, res: Response) => {
+//   try {
+//     const handle = temporal.workflow.getHandle(req.body.email);
+//     const result = await handle.query(getValueQuery);
+//     res.send(`Result is: ${JSON.stringify(result)}`);
+//   }
+//   catch (err) {
+//     if (err instanceof WorkflowNotFoundError) {
+//       return res.status(404).send('Urlaubsantrag nicht gefunden.')
+//     } else {
+//       return res.status(500).send('Server error.')
+//     }
+//   }
+// })
+//
+// /** Query a signal of a running workflow */
+// app.post('/state', async (req: Request, res: Response) => {
+//   try {
+//     const { email, ...newState } = req.body;
+//
+//     const handle = temporal.workflow.getHandle(email);
+//     const result = await handle.signal(setValueSignal, newState);
+//
+//     res.send(`You added some info to your Urlaubsantrag: ${JSON.stringify(result)}`);
+//   }
+//   catch (err) {
+//     if (err instanceof WorkflowNotFoundError) {
+//       return res.status(404).send('Urlaubsantrag nicht gefunden.')
+//     } else {
+//       return res.status(500).send('Server error.')
+//     }
+//   }
+// });
+//
+/** Approve a Urlaubsantrag */
+app.post('/approve', async (req: Request, res: Response) => {
+  try {
+    const handle = temporal.workflow.getHandle(req.body.email);
+    await handle.signal(acceptSignal);
+    res.send(`Du hast den Urlaubsantrag für "${req.body.email}" bestätigt.`);
+  }
+  catch (err) {
+    if (err instanceof WorkflowNotFoundError) {
+      return res.status(404).send('Urlaubsantrag nicht gefunden.')
+    } else {
+      return res.status(500).send('Server error.')
+    }
+  }
 });
 
-/** Send a signal to a workflow */
-app.post('/signal/:workflowId', async (req: Request, res: Response) => {
-  const handle = temporal.workflow.getHandle(req.params.workflowId);
+/** Register a new Urlaubsantrag */
+app.post('/antrag', async (req: Request, res: Response) => {
 
-  for (const [key, value] of Object.entries(req.body)) {
-    if (key === 'accept') {
-      await handle.signal(acceptSignal);
-    }
-    else if (key === 'reject') {
-      await handle.signal(rejectSignal);
-    }
-    else {
-      await handle.signal(setValueSignal, key, value);
+  try {
+    await temporal.workflow.start(urlaubsAntrag, {
+      taskQueue: 'MUTTI',
+      workflowId: req.body.email,
+      args: [req.body],
+    });
+  }
+  catch (err) {
+    if (err instanceof WorkflowExecutionAlreadyStartedError) {
+      return res.status(400).send('Du hast schon einen Antrag laufen.');
+    } else {
+      throw err;
     }
   }
 
-  res.send(`Sent data: ${JSON.stringify(req.body)}`);
+  res.send(`Urlaub für alle. ${req.body.email.split('@')[0]}, wir werden deinen Antrag gewissenhaft prüfen.`);
 });
 
-/** Start a workflow */
-app.post('/workflow/start/', triggerWorkflow);
-app.post('/workflow/start/:workflowId', triggerWorkflow);
-async function triggerWorkflow(req: Request, res: Response) {
-
-  await temporal.workflow.start(aktenFluss, {
-    taskQueue: '🤡-important-stuff',
-    workflowId: req.params.workflowId,
-    args: [req.body],
-  });
-
-  res.send(`Workflow ${req.params.workflowId} started. You can now signal, query, or cancel it.`);
-};
-
-/** Cancel a workflow */
-app.post('/workflow/stop/:workflowId', async (req: Request, res: Response) => {
-  await temporal.workflow.getHandle(req.params.workflowId).cancel();
-  res.send(`Workflow ${req.params.workflowId} stopped.`);
-});
+// /** Cancel a Urlaubsantrag */
+// app.post('/stop', async (req: Request, res: Response) => {
+//   await temporal.workflow.getHandle(req.body.email).cancel();
+//   res.send(`Du (${req.body.email}) hast den Urlaubsantrag abgesagt.`);
+// });
 

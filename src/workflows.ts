@@ -1,41 +1,54 @@
-import { ApplicationFailure, CancellationScope, defineSignal, setHandler, defineQuery, proxyActivities, sleep } from '@temporalio/workflow';
+import * as wf from '@temporalio/workflow';
 import { Duration } from '@temporalio/common';
-import type { createActivities } from './activities';
+import type * as activities from './activities';
 
-export const setValueSignal = defineSignal<[string, any]>('setValue');
-export const acceptSignal = defineSignal('accept');
-export const rejectSignal = defineSignal('reject');
-export const getValueQuery = defineQuery<number | undefined, [string]>('getValue');
+export const acceptSignal = wf.defineSignal('accept');
 
-const { read, write } = proxyActivities<ReturnType<typeof createActivities>>({
-  startToCloseTimeout: '6 minutes',
+const { sendMails, urlaubAbsagen, urlaubEintragen, urlaubBestaetigen } = wf.proxyActivities<typeof activities>({
+  startToCloseTimeout: '100 hours',
 });
 
-export function timeOutOrUserAction(timeout: Duration) {
-  return new Promise((res) => {
-    setHandler(acceptSignal, () => res('good'))
-    setHandler(rejectSignal, () => res('bad'))
-    sleep(timeout).then(() => res('no time'))
-  })
+export async function urlaubsAntrag(input: any): Promise<void> {
+  const { email } = input;
+  await urlaubEintragen(email);
+
+  const userInteraction = new wf.Trigger<boolean>();
+  wf.setHandler(acceptSignal, () => userInteraction.resolve(true));
+  const accepted = await Promise.race([userInteraction, wf.sleep('100 seconds').then(() => false)])
+
+  if (accepted) {
+    await urlaubBestaetigen(email)
+    await sendMails([email], { subject: 'Urlaub genehmigt', text: '😎' })
+  }
+  else {
+    await urlaubAbsagen(email)
+    await sendMails([email], { subject: 'Urlaub nicht genehmigt', text: '😭' })
+  }
 }
 
-export async function aktenFluss(input: string): Promise<void> {
-  const state = new Map<string, any>();
-  state.set('input', input);
 
-  setHandler(setValueSignal, (key, value) => void state.set(key, value));
-  setHandler(getValueQuery, (key) => state.get(key));
-
-  console.log('testm ey round');
-
-  const status = await timeOutOrUserAction('200s');
-  if (status === 'good') {
-    await write('new-test');
-  }
-  else if (status === 'no time') {
-    throw new ApplicationFailure('Task timed out.', 'test', false, ['one detail', 'two details'])
-  }
-
-  // await CancellationScope.current().cancelRequested;
-}
-
+// export async function urlaubsAntrag(input: string): Promise<void> {
+//   const email = wf.workflowInfo().workflowId;
+//   await urlaubEintragen(email);
+//
+//   const userInteraction = new wf.Trigger<boolean>();
+//   wf.setHandler(acceptSignal, () => userInteraction.resolve(true));
+//   const accepted = await Promise.race([userInteraction, wf.sleep('100 seconds').then(() => false)])
+//
+//   if (accepted) {
+//     await urlaubBestaetigen(email);
+//     await sendMails([email], { subject: 'Urlaubsantrag', text: `Hi ${email.split('@')[0]},\n Viel Spaß im Urlaub! ` })
+//   }
+//   else {
+//     await urlaubAbsagen(email);
+//     throw new wf.ApplicationFailure('Nicht akzeptiert.')
+//   }
+// }
+//
+// export async function waitOnUser(timeout: Duration): Promise<boolean> {
+//   const userInteraction = new wf.Trigger<boolean>();
+//   wf.setHandler(acceptSignal, () => userInteraction.resolve(true));
+//
+//   return await Promise.race([userInteraction, wf.sleep(timeout).then(() => false)]);
+// }
+//

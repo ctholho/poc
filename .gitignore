@@ -2,3 +2,5 @@ lib
 node_modules
 sideeffects
 temporal-db
+.env*
+!.env.example

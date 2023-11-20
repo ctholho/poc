@@ -1,48 +1,41 @@
-import express, { Request, Response } from 'express';
+import 'dotenv/config'
+import express from 'express';
 import http from 'http';
-import fs from 'fs';
+import { prepEmail } from './helpers'
+import type { Request, Response } from 'express'
 
-const PORT = 3001;
-const BASE_DIRECTORY = './sideeffects/';
-// set default dir for fs
-
+// 🏁 SETUP Server
 const app = express();
 app.use(express.json());
 const httpServer = http.createServer(app);
-httpServer.listen(PORT, () => {
-  console.log(`External sideeffects Server is running on http://localhost:${PORT}`);
+httpServer.listen(3001, () => {
+  console.log(`External sideeffects Server is running on http://localhost:3001`);
 });
 
-function randomString() {
-  return Math.random().toString(36).substring(7, 14)
-}
 
-/** Unreliably create a file with silly content */
-app.post('/create-file/:fileName', async (req: Request, res: Response) => {
-  const fileName = req.params.fileName;
-  const suffix = randomString()
-  const fileContent = 'boring is as boring does'
+// 🚦 Routes
+app.post('/urlaub-melden', async (req: Request, res: Response) => {
+  res.status(200).send('Urlaub im Mitarbeiterportal gemeldet.')
+})
 
+app.post('/urlaub-bestaetigen', async (req: Request, res: Response) => {
+  res.status(200).send('Urlaub im Mitarbeiterportal bestätigt.')
+})
+
+app.post('/urlaub-absagen', async (req: Request, res: Response) => {
+  res.status(200).send('Urlaub im Mitarbeiterportal wieder abgesagt.')
+})
+
+/** Send mail */
+app.post('/email', async (req: Request, res: Response) => {
   try {
-    await fs.promises.writeFile(`${BASE_DIRECTORY}${fileName}${suffix}`, fileContent);
+    const { mailTransporter, to, text } = prepEmail(req);
+    mailTransporter.sendMail({ to, text, subject: 'Tech Talks', from: process.env.EMAIL_USER })
+    return res.status(200).send('email send')
   }
   catch (err) {
-    return res.status(500).send(`Error while writing file ${fileName}.`);
+    return res.status(500).send('error while sending email');
   }
-  res.send(`File saved ${fileName}`);
-});
 
-/** Unreliably read a file */
-app.get('/read-file/:fileName', async (req: Request, res: Response) => {
-  const fileName = req.params.fileName;
-  const fail = Math.random() < 0.5;
+})
 
-  fs.readFile(`${BASE_DIRECTORY}${fileName}`, 'utf8', (err, data) => {
-    if (err || fail) {
-      console.log(err);
-      res.status(500).send(`Error while reading file ${fileName}`);
-    } else {
-      res.send(data);
-    }
-  });
-});
