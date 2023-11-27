@@ -31,7 +31,15 @@ export function prepEmail(req: Request): IPrepEmail {
   return { mailTransporter, to, text }
 }
 
-export function fuckItUpMiddleware(req: Request, res: Response, next: NextFunction, failFactor: number) {
-  res.status(500).send('Error: Sucks to be you. Lol!')
+/** Fail a request by the pure chance */
+export function fuckItUp(failFactor: number) {
+  return (req: Request, res: Response, next: NextFunction) => {
+    const fail = Math.random() < failFactor
+    if (fail) {
+      res.status(502).send('Error: Maybe something with the network');
+    } else {
+      next();
+    }
+  }
 }
 
